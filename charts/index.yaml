@@ -1,0 +1,15 @@
+apiVersion: v1
+entries:
+  dremio:
+  - apiVersion: v1
+    created: 2018-12-27T22:51:05.908168235-08:00
+    digest: 2fea1e7a714ebda384b1971427e9ec58cf09dfd9da409d2806c308c49d08a49d
+    home: https://www.dremio.com/
+    keywords:
+    - dremio
+    - data
+    name: dremio
+    urls:
+    - dremio-0.0.5.tgz
+    version: 0.0.5
+generated: 2018-12-27T22:51:05.904919976-08:00
