@@ -37,6 +37,7 @@ helm install dremio --set image=$image --name dremio-cluster --wait --timeout 90
 [ $? != 0 ] && echo "Dremio deployment failed. Please review the error." && exit 1
 echo "Deployment complete."
 echo "You can access Dremio using:"
-dremioUIAddress=$(kubectl get services --output json dremio-client | jq -r .items[0].status.loadBalancer.ingress[0].ip)
+dremioUIAddress=$(kubectl get services --output json dremio-client | jq -r .item[0].status.loadBalancer.ingress[0].ip)
+[ "$dremioUIAddress" == "null" ] && dremioUIAddress=$(kubectl get services --output json dremio-client | jq -r .status.loadBalancer.ingress[0].ip)
 echo "    http://$dremioUIAddress:9047"
 echo "Enjoy using Dremio!"
