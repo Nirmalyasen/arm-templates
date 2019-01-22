@@ -123,3 +123,7 @@ Once all the pods are restarted and running, your Dremio cluster is upgraded.
 Dremio configuration files used by the deployment are in the config directory. These files are propagated to all the pods in the cluster. Updating the configuration and upgrading the helm release - just like doing an upgrade - would refresh all the pods with the new configuration. [Dremio documentation](https://docs.dremio.com/deployment/README-config.html) covers the configuration capabilities in Dremio.
 
 If you need to add a core-site.xml, you can add the file to the config directory and it will be propagated to all the pods on install or upgrade of the deployment.
+<<<<<<< HEAD
+=======
+
+>>>>>>> 553135d9bd7f49c753c1597f44bfc602c9b3318c
