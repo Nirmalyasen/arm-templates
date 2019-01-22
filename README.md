@@ -5,7 +5,7 @@
 This is a Helm chart to deploy a Dremio cluster in kubernetes. It uses a persistent volume for the master node to store the metadata for the cluster. The default configuration uses the default persistent storage supported by the kubernetes platform. For example,
 
 | Kubernetes platform | Persistent store |
-| ------------------- | ---------------- |
+|---------------------|------------------|
 | AWS EKS             | EBS              |
 | Azure AKS           | Azure disk (HDD) |
 | Google GKE          | Persistent Disk  |
