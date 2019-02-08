@@ -32,34 +32,6 @@
         "description": "Password or ssh key for the virtual machines."
       }
     },
-    "storageNewOrExisting": {
-      "type": "string",
-      "defaultValue": "new",
-      "metadata": {
-        "description": "Determines whether or not a new storage account should be provisioned."
-      }
-    },
-    "storageAccountName": {
-      "type": "string",
-      "defaultValue": "[concat('storage', uniqueString(resourceGroup().id))]",
-      "metadata": {
-        "description": "Name of the storage account"
-      }
-    },
-    "storageAccountType": {
-      "type": "string",
-      "defaultValue": "Standard_LRS",
-      "metadata": {
-        "description": "Storage account type"
-      }
-    },
-    "storageAccountResourceGroupName": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().name]",
-      "metadata": {
-        "description": "Name of the resource group for the existing storage account"
-      }
-    },
     "dataDiskId": {
       "type": "string"
     },
@@ -156,7 +128,6 @@
   },
   "variables": {
     "computeApiVersion": "2018-06-01",
-    "storageApiVersion": "2018-07-01",
     "location": "[resourceGroup().location]",
     "nicName": "[concat(parameters('dremioClusterName'), '-nic')]",
     "dremioImage": {
@@ -191,17 +162,6 @@
     "scriptURL": "[concat(variables('baseURI'), variables('scriptFileName'))]"
   },
   "resources": [
-    {
-      "condition": "[equals(parameters('storageNewOrExisting'), 'new')]",
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "[variables('storageApiVersion')]",
-      "name": "[parameters('storageAccountName')]",
-      "location": "[variables('location')]",
-      "kind": "Storage",
-      "sku": {
-        "name": "[parameters('storageAccountType')]"
-      }
-    },
     {
       "condition": "[equals(parameters('publicIpNewOrExisting'), 'new')]",
       "type": "Microsoft.Network/publicIPAddresses",
@@ -395,7 +355,7 @@
                           "fileUris": [
                             "[variables('scriptURL')]"
                           ],
-                          "commandToExecute": "[concat('bash ', variables('scriptFileName'), ' coordinator ', reference(concat(parameters('dremioClusterName'), '-nic'), variables('computeApiVersion')).ipConfigurations[0].properties.privateIPAddress)]"
+                          "commandToExecute": "[concat('DOWNLOAD_URL=\"', parameters('dremioDownloadURL'), '\" bash ', variables('scriptFileName'), ' coordinator ', reference(concat(parameters('dremioClusterName'), '-nic'), variables('computeApiVersion')).ipConfigurations[0].properties.privateIPAddress)]"
                         }
                       }
                     }
@@ -470,7 +430,7 @@
                           "fileUris": [
                             "[variables('scriptURL')]"
                           ],
-                          "commandToExecute": "[concat('bash ', variables('scriptFileName'), ' executor ', reference(concat(parameters('dremioClusterName'), '-nic'), variables('computeApiVersion')).ipConfigurations[0].properties.privateIPAddress)]"
+                          "commandToExecute": "[concat('DOWNLOAD_URL=\"', parameters('dremioDownloadURL'), '\" bash ', variables('scriptFileName'), ' executor ', reference(concat(parameters('dremioClusterName'), '-nic'), variables('computeApiVersion')).ipConfigurations[0].properties.privateIPAddress)]"
                         }
                       }
                     }
