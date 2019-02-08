@@ -1,6 +1,6 @@
 #/bin/bash -e
 
-[ -z $DOWNLOAD_URL ] && DOWNLOAD_URL="https://s3-us-west-2.amazonaws.com/support.dremio.com/3.1.2-EE/dremio-enterprise-3.1.2-201901311232340848_3f32186_1.noarch.rpm?AWSAccessKeyId=AKIAJEY6LHKP7RABEROQ&Signature=HXBISrYDL1YmPT9gXB%2FgLZkbPEg%3D&Expires=1550183541"
+[ -z $DOWNLOAD_URL ] && DOWNLOAD_URL="http://download.dremio.com/community-server/3.1.1-201901281837360699-30c9d74/dremio-community-3.1.1-201901281837360699_30c9d74_1.noarch.rpm"
 if [ ! -f /opt/dremio/bin/dremio ]; then
   command -v yum >/dev/null 2>&1 || { echo >&2 "This script works only on Centos or Red Hat. Aborting."; exit 1; }
   yum install -y java-1.8.0-openjdk
