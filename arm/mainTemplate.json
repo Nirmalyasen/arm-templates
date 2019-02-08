@@ -1,0 +1,132 @@
+
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "clusterName": {
+          "type": "string",
+          "defaultValue": "mydremio",
+          "metadata": {
+            "description": "Give your cluster a name in Azure."
+          }
+        },
+        "sshUsername": {
+          "type": "string",
+          "defaultValue": "azuser",
+          "metadata": {
+            "description": "SSH username for the virtual machines."
+          }
+        },
+        "authenticationType": {
+          "type": "string",
+          "defaultValue": "password",
+          "allowedValues": [
+            "password",
+            "sshPublicKey"
+          ],
+          "metadata": {
+            "description": "Type of authentication to use on the virtual machines."
+          }
+        },
+        "sshPasswordOrKey": {
+          "type": "securestring",
+          "metadata": {
+            "description": "Password or ssh key for the virtual machines."
+          }
+        },
+        "coordinatorVmSize": {
+          "type": "string",
+          "defaultValue": "Standard_A2_v2",
+          "metadata": {
+            "description": "Size for the coordinator virtual machines."
+          }
+        },
+        "coordinators": {
+            "type": "string",
+            "defaultValue": "0",
+            "metadata": {
+              "description": "Number of coordinators in the cluster. There will be one master coordinator created aside these coordinator nodes. It is ok to have zero coordinators. "
+            }
+        },
+        "executorVmSize": {
+          "type": "string",
+          "defaultValue": "Standard_A2_v2",
+          "metadata": {
+            "description": "Size for the executor virtual machines."
+          }
+        },
+        "executors": {
+            "type": "string",
+            "defaultValue": "3",
+            "metadata": {
+              "description": "Number of executors in the cluster"
+            }
+        }
+    },
+    "variables": {
+      "baseURI": "https://raw.githubusercontent.com/Nirmalyasen/arm-templates/master/arm/",
+      "apiVersion": "2018-05-01",
+      "shortName": "[take(resourceGroup().name, 40)]",
+      "rgName": "[resourceGroup().name]",
+      "location": "[resourceGroup().location]",
+      "stateRgName": "[resourceGroup().name]",
+      "dataDiskName": "[concat(parameters('clusterName'), '-master-data-disk')]",
+      "dataDiskId": "[concat(subscription().id, '/resourceGroups/', variables('stateRgName'), '/providers/Microsoft.Compute/disks/', variables('dataDiskName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "[variables('apiVersion')]",
+            "name": "[concat(variables('shortName'), '-state-deployment')]",
+            "resourceGroup": "[variables('stateRgName')]",
+            "dependsOn": [
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                   "uri": "[concat(variables('baseURI'), 'dremioState.json')]",
+                   "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                   "dremioClusterName": {"value": "[parameters('clusterName')]"},
+                   "dataDiskName": {"value": "[variables('dataDiskName')]"}
+                 }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "[variables('apiVersion')]",
+            "name": "[concat(variables('shortName'), '-compute-deployment')]",
+            "resourceGroup": "[variables('rgName')]",
+            "dependsOn": [
+                "[concat(variables('shortName'), '-state-deployment')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                   "uri": "[concat(variables('baseURI'), 'dremioCluster.json')]",
+                   "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                   "dremioClusterName": {"value": "[parameters('clusterName')]"},
+                   "executorCount": {"value": "[parameters('executors')]"},
+                   "executorVmSize": {"value": "[parameters('executorVmSize')]"},
+                   "coordinatorCount": {"value": "[parameters('coordinators')]"},
+                   "coordinatorVmSize": {"value": "[parameters('coordinatorVmSize')]"},
+                   "dataDiskId": {"value": "[reference(concat(variables('shortName'), '-state-deployment')).outputs.dataDiskId.value]"},
+                   "sshUsername": {"value": "[parameters('sshUsername')]"},
+                   "sshPasswordOrKey": {"value": "[parameters('sshPasswordOrKey')]"},
+                   "subnetId": {"value": "[reference(concat(variables('shortName'), '-state-deployment')).outputs.subnetId.value]"},
+                   "loadBalancerId": {"value": "[reference(concat(variables('shortName'), '-state-deployment')).outputs.loadBalancerId.value]"},
+                   "nsgId": {"value": "[reference(concat(variables('shortName'), '-state-deployment')).outputs.nsgId.value]"}
+                 }
+            }
+        }
+    ],
+    "outputs": {
+      "dremioUi": {
+        "type": "string",
+        "value": "[concat('http://', reference(concat(variables('shortName'), '-state-deployment')).outputs.dremioUIAddress.value, ':9047')]"
+      }
+    }
+}
