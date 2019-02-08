@@ -215,7 +215,6 @@
       "name": "[concat(parameters('dremioClusterName'), '-master')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[parameters('storageAccountName')]",
         "[variables('nicName')]"
       ],
       "properties": {
@@ -251,12 +250,6 @@
               "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
             }
           ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": true,
-            "storageUri": "[reference(resourceId(parameters('storageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), variables('storageApiVersion')).primaryEndpoints.blob]"
-          }
         }
       },
       "resources": [
